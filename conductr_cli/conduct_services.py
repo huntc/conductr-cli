@@ -1,20 +1,20 @@
-from conductr_cli import bundle_utils, conduct_url, conduct_logging, screen_utils
+from conductr_cli import bundle_utils, conduct_url, validation, screen_utils
 import json
 import requests
 from urllib.parse import urlparse
 
 
-@conduct_logging.handle_connection_error
-@conduct_logging.handle_http_error
+@validation.handle_connection_error
+@validation.handle_http_error
 def services(args):
     """`conduct services` command"""
 
     url = conduct_url.url('bundles', args)
     response = requests.get(url)
-    conduct_logging.raise_for_status_inc_3xx(response)
+    validation.raise_for_status_inc_3xx(response)
 
     if args.verbose:
-        conduct_logging.pretty_json(response.text)
+        validation.pretty_json(response.text)
 
     data = sorted([
         (
@@ -51,5 +51,5 @@ def services(args):
 
     if len(duplicate_endpoints) > 0:
         print()
-        conduct_logging.warning('Multiple endpoints found for the following services: {}'.format(', '.join(duplicate_endpoints)))
-        conduct_logging.warning('Service resolution for these services is undefined.')
+        validation.warning('Multiple endpoints found for the following services: {}'.format(', '.join(duplicate_endpoints)))
+        validation.warning('Service resolution for these services is undefined.')

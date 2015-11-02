@@ -3,23 +3,21 @@ import argparse
 from conductr_cli import \
     conduct_info, conduct_load, conduct_run, conduct_services,\
     conduct_stop, conduct_unload, conduct_version, conduct_logs,\
-    conduct_events
+    conduct_events, host
 import os
 
-
-default_ip = os.getenv('CONDUCTR_IP', '127.0.0.1')
-default_port = os.getenv('CONDUCTR_PORT', '9005')
-default_api_version = os.getenv('CONDUCTR_API_VERSION', '1.0')
+DEFAULT_PORT = os.getenv('CONDUCTR_PORT', '9005')
+DEFAULT_API_VERSION = os.getenv('CONDUCTR_API_VERSION', '1.0')
 
 
 def add_ip_and_port(sub_parser):
     sub_parser.add_argument('-i', '--ip',
                             help='The optional ConductR IP, defaults to $CONDUCTR_IP or "127.0.0.1"',
-                            default=default_ip)
+                            default=None)
     sub_parser.add_argument('-p', '--port',
                             type=int,
                             help='The optional ConductR port, defaults to $CONDUCTR_PORT or "9005"',
-                            default=default_port)
+                            default=DEFAULT_PORT)
 
 
 def add_verbose(sub_parser):
@@ -41,7 +39,7 @@ def add_long_ids(sub_parser):
 def add_api_version(sub_parser):
     sub_parser.add_argument('--api-version',
                             help='Sets which ConductR api version to be used',
-                            default=default_api_version,
+                            default=DEFAULT_API_VERSION,
                             dest='api_version',
                             choices=conduct_version.supported_api_versions())
 
@@ -55,10 +53,9 @@ def add_default_arguments(sub_parser):
 
 def build_parser():
     # Main argument parser
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(title='subcommands',
-                                       description='valid subcommands',
-                                       help='help for subcommands')
+    parser = argparse.ArgumentParser('conduct')
+    subparsers = parser.add_subparsers(title='commands',
+                                       help='Use one of the following sub commands')
 
     # Sub-parser for `version` sub-command
     version_parser = subparsers.add_parser('version',
@@ -161,11 +158,11 @@ def build_parser():
 
 def get_cli_parameters(args):
     parameters = ['']
-    if getattr(args, 'ip', default_ip) != default_ip:
-        parameters.append('--ip {}'.format(args.ip))
-    if getattr(args, 'port', int(default_port)) != int(default_port):
+    if not getattr(args, 'ip'):
+        parameters.append('--ip {}'.format(host.resolve_default_ip()))
+    if getattr(args, 'port', int(DEFAULT_PORT)) != int(DEFAULT_PORT):
         parameters.append('--port {}'.format(args.port))
-    if getattr(args, 'api_version', default_api_version) != default_api_version:
+    if getattr(args, 'api_version', DEFAULT_API_VERSION) != DEFAULT_API_VERSION:
         parameters.append('--api-version {}'.format(args.api_version))
     return ' '.join(parameters)
 
@@ -175,10 +172,12 @@ def run():
     parser = build_parser()
     argcomplete.autocomplete(parser)
     args = parser.parse_args()
-    if vars(args).get('func') is None:
+    if not vars(args).get('func'):
         parser.print_help()
     else:
         args.cli_parameters = get_cli_parameters(args)
+        if not args.ip:
+            return
         args.func(args)
 
 

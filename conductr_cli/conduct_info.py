@@ -1,19 +1,19 @@
-from conductr_cli import bundle_utils, conduct_url, conduct_logging, screen_utils
+from conductr_cli import bundle_utils, conduct_url, validation, screen_utils
 import json
 import requests
 
 
-@conduct_logging.handle_connection_error
-@conduct_logging.handle_http_error
+@validation.handle_connection_error
+@validation.handle_http_error
 def info(args):
     """`conduct info` command"""
 
     url = conduct_url.url('bundles', args)
     response = requests.get(url)
-    conduct_logging.raise_for_status_inc_3xx(response)
+    validation.raise_for_status_inc_3xx(response)
 
     if args.verbose:
-        conduct_logging.pretty_json(response.text)
+        validation.pretty_json(response.text)
 
     data = [
         {

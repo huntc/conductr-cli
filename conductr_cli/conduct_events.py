@@ -1,20 +1,20 @@
-from conductr_cli import conduct_logging, conduct_url, screen_utils
+from conductr_cli import validation, conduct_url, screen_utils
 import json
 import requests
 
 
-@conduct_logging.handle_connection_error
-@conduct_logging.handle_http_error
+@validation.handle_connection_error
+@validation.handle_http_error
 def events(args):
     """`conduct events` command"""
 
     request_url = conduct_url.url('bundles/{}/events?count={}'.format(args.bundle, args.lines), args)
     response = requests.get(request_url)
-    conduct_logging.raise_for_status_inc_3xx(response)
+    validation.raise_for_status_inc_3xx(response)
 
     data = [
         {
-            'time': conduct_logging.format_timestamp(event['timestamp'], args),
+            'time': validation.format_timestamp(event['timestamp'], args),
             'event': event['event'],
             'description': event['description']
         } for event in json.loads(response.text)

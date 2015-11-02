@@ -52,6 +52,7 @@ setup(
     entry_points={
         'console_scripts': [
             'conduct = conductr_cli.conduct:run',
+            'sandbox = conductr_cli.sandbox:run',
             'shazar = conductr_cli.shazar:run',
         ],
     },

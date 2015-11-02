@@ -1,5 +1,5 @@
 from unittest import TestCase
-from conductr_cli import conduct_logging
+from conductr_cli import validation
 import arrow
 
 try:
@@ -14,7 +14,7 @@ class TestConductLogsCommand(TestCase):
         args = MagicMock()
         args.date = True
         args.utc = True
-        result = conduct_logging.format_timestamp(input, args)
+        result = validation.format_timestamp(input, args)
         self.assertEqual('2015-08-24T01:16:22Z', result)
 
     def test_format_timestamp_utc(self):
@@ -22,7 +22,7 @@ class TestConductLogsCommand(TestCase):
         args = MagicMock()
         args.date = False
         args.utc = True
-        result = conduct_logging.format_timestamp(input, args)
+        result = validation.format_timestamp(input, args)
         self.assertEqual('01:16:22Z', result)
 
     def test_format_date_timestamp(self):
@@ -30,7 +30,7 @@ class TestConductLogsCommand(TestCase):
         args = MagicMock()
         args.date = True
         args.utc = False
-        result = conduct_logging.format_timestamp(input, args)
+        result = validation.format_timestamp(input, args)
         expected_result = arrow.get(input).to('local').datetime.strftime('%c')
         self.assertEqual(expected_result, result)
 
@@ -39,6 +39,6 @@ class TestConductLogsCommand(TestCase):
         args = MagicMock()
         args.date = False
         args.utc = False
-        result = conduct_logging.format_timestamp(input, args)
+        result = validation.format_timestamp(input, args)
         expected_result = arrow.get(input).to('local').datetime.strftime('%X')
         self.assertEqual(expected_result, result)

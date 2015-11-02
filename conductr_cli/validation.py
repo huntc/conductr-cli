@@ -8,6 +8,7 @@ from requests import status_codes
 from requests.exceptions import ConnectionError, HTTPError
 from urllib.error import URLError
 from zipfile import BadZipFile
+from conductr_cli.exceptions import DockerMachineError
 
 
 def error(message, *objs):
@@ -113,6 +114,21 @@ def raise_for_status_inc_3xx(response):
     response.raise_for_status()
     if response.status_code >= 300:
         raise HTTPError(status_codes._codes[response.status_code], response=response)
+
+
+def handle_docker_machine_error(func):
+    def handler(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except DockerMachineError:
+            error('Docker VM has not been started.')
+            error('Use `docker-machine start default` to start the VM.')
+
+    # Do not change the wrapped function name,
+    # so argparse configuration can be tested.
+    handler.__name__ = func.__name__
+
+    return handler
 
 
 def format_timestamp(timestamp, args):
