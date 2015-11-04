@@ -1,7 +1,8 @@
-from conductr_cli import sandbox_common, terminal
-from conductr_cli.sandbox_common import  CONDUCTR_NAME_PREFIX, CONDUCTR_DEV_IMAGE, CONDUCTR_PORTS
+from conductr_cli import sandbox_common, terminal, validation
+from conductr_cli.sandbox_common import CONDUCTR_NAME_PREFIX, CONDUCTR_DEV_IMAGE, CONDUCTR_PORTS
 
 
+@validation.handle_docker_errors
 def run(args):
     """`sandbox run` command"""
 
@@ -13,18 +14,20 @@ def run(args):
 def pull_image(args):
     if args.image == CONDUCTR_DEV_IMAGE and not terminal.docker_images(CONDUCTR_DEV_IMAGE):
         print('Pulling down the ConductR development image..')
-        terminal.docker_pull('{image_name}:{image_version}'.format(image_name=CONDUCTR_DEV_IMAGE, image_version=args.image_version))
+        terminal.docker_pull('{image_name}:{image_version}'
+                             .format(image_name=CONDUCTR_DEV_IMAGE, image_version=args.image_version))
 
 
 def collect_ports(args):
     """Return a Set of ports based on the ports of each enabled feature and the ports specified by the user"""
+
     def to_feature(feature_name):
         if feature_name == 'visualization':
-            return { 'name': feature_name, 'ports': [9999] }
+            return {'name': feature_name, 'ports': [9999]}
         elif feature_name == 'logging':
-            return { 'name': feature_name, 'ports': [5601, 9200] }
+            return {'name': feature_name, 'ports': [5601, 9200]}
         elif feature_name == 'monitoring':
-            return { 'name': feature_name, 'ports': [] }
+            return {'name': feature_name, 'ports': []}
 
     all_feature_ports = [to_feature(feature_name)['ports'] for feature_name in args.features]
     return set(args.ports + [port for feature_ports in all_feature_ports for port in feature_ports])
@@ -35,7 +38,7 @@ def scale_cluster(args, ports):
     if args.nr_of_containers > len(running_containers):
         start_nodes(args, ports)
     elif args.nr_of_containers < len(running_containers):
-        stop_nodes()
+        stop_nodes(args, running_containers)
     else:
         print('ConductR nodes {} already exists, leaving them alone.'.format(', '.join(running_containers)))
 
@@ -43,13 +46,14 @@ def scale_cluster(args, ports):
 def start_nodes(args, ports):
     print('Starting ConductR nodes..')
     for i in range(args.nr_of_containers):
-        container_name = '{prefix}{nr}'.format(prefix = CONDUCTR_NAME_PREFIX, nr = i)
+        container_name = '{prefix}{nr}'.format(prefix=CONDUCTR_NAME_PREFIX, nr=i)
         container_id = terminal.docker_ps('name={}'.format(container_name))
         if not container_id:
             # Display the ports on the command line. Only if the user specifies a certain feature, then
             # the corresponding port will be displayed when running 'sandbox run' or 'sandbox debug'
-            ports_desc = ' exposing ' + ', '.join(['{}:{}'.format(args.ip, map_port(i, port)) for port in ports]) if ports else ''
-            print('Starting container {container}{port_desc}..'.format(container = container_name, port_desc = ports_desc))
+            ports_desc = ' exposing ' + ', '.join(
+                ['{}:{}'.format(args.ip, map_port(i, port)) for port in ports]) if ports else ''
+            print('Starting container {container}{port_desc}..'.format(container=container_name, port_desc=ports_desc))
             cond0_ip = inspect_cond0_ip() if i > 0 else None
             conductr_container_roles = resolve_conductr_roles_by_container(args.conductr_roles, i)
             run_conductr_cmd(
@@ -57,7 +61,7 @@ def start_nodes(args, ports):
                 container_name,
                 cond0_ip,
                 args.envs,
-                '{image}:{version}'.format(image = args.image, version = args.image_version),
+                '{image}:{version}'.format(image=args.image, version=args.image_version),
                 args.log_level,
                 ports,
                 args.features,
@@ -127,3 +131,10 @@ def resolve_docker_run_port_args(ports, instance):
 def resolve_docker_run_positional_args(cond0_ip):
     seed_node_arg = ['--seed', '{}:{}'.format(cond0_ip, 9004)] if cond0_ip else []
     return ['--discover-host-ip'] + seed_node_arg
+
+
+def stop_nodes(args, running_containers):
+    print('Stopping ConductR nodes..')
+    last_containers = len(running_containers) - args.nr_of_containers
+    containers_to_be_stopped = running_containers[-last_containers:]
+    return terminal.docker_rm(containers_to_be_stopped)

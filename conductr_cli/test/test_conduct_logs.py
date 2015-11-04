@@ -8,7 +8,7 @@ except ImportError:
     from mock import patch, MagicMock
 
 
-class TestConductLogsCommand(TestCase, CliTestCase):
+class TestConductLogsCommand(CliTestCase):
 
     default_args = {
         'ip': '127.0.0.1',

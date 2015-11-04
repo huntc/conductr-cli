@@ -23,14 +23,17 @@ if sys.version_info[:2] == (3, 2):
 class Tox(test):
     user_options = [('tox-args=', 'a', 'Arguments to pass to tox')]
 
+    def __init__(self, dist, **kw):
+        super().__init__(dist, **kw)
+        self.test_suite = True
+        self.test_args = []
+        self.tox_args = None
+
     def initialize_options(self):
         test.initialize_options(self)
-        self.tox_args = None
 
     def finalize_options(self):
         test.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
 
     def run_tests(self):
         # import here, cause outside the eggs aren't loaded

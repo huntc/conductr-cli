@@ -1,4 +1,3 @@
-from unittest import TestCase
 from conductr_cli.test.cli_test_case import CliTestCase, strip_margin
 from conductr_cli import conduct_services
 
@@ -8,7 +7,7 @@ except ImportError:
     from mock import patch, MagicMock
 
 
-class TestConductServicesCommand(TestCase, CliTestCase):
+class TestConductServicesCommand(CliTestCase):
 
     default_args = {
         'ip': '127.0.0.1',
@@ -107,11 +106,12 @@ class TestConductServicesCommand(TestCase, CliTestCase):
 
         http_method.assert_called_with(self.default_url)
         self.assertEqual(
-            strip_margin("""|SERVICE                   BUNDLE ID                         BUNDLE NAME                  STATUS
-                            |http://:8010/comp1-endp1  f804d644a01a5ab9f679f76939f5c7e2  multi-comp-multi-endp-1.0.0  Starting
-                            |http://:8011/comp1-endp2  f804d644a01a5ab9f679f76939f5c7e2  multi-comp-multi-endp-1.0.0  Starting
-                            |http://:9010/comp2-endp1  f804d644a01a5ab9f679f76939f5c7e2  multi-comp-multi-endp-1.0.0  Starting
-                            |http://:9011/comp2-endp2  f804d644a01a5ab9f679f76939f5c7e2  multi-comp-multi-endp-1.0.0  Starting
-                            |http://my.service         f804d644a01a5ab9f679f76939f5c7e2  multi-comp-multi-endp-1.0.0  Starting
-                            |"""),
+            strip_margin(
+                """|SERVICE                   BUNDLE ID                         BUNDLE NAME                  STATUS
+                   |http://:8010/comp1-endp1  f804d644a01a5ab9f679f76939f5c7e2  multi-comp-multi-endp-1.0.0  Starting
+                   |http://:8011/comp1-endp2  f804d644a01a5ab9f679f76939f5c7e2  multi-comp-multi-endp-1.0.0  Starting
+                   |http://:9010/comp2-endp1  f804d644a01a5ab9f679f76939f5c7e2  multi-comp-multi-endp-1.0.0  Starting
+                   |http://:9011/comp2-endp2  f804d644a01a5ab9f679f76939f5c7e2  multi-comp-multi-endp-1.0.0  Starting
+                   |http://my.service         f804d644a01a5ab9f679f76939f5c7e2  multi-comp-multi-endp-1.0.0  Starting
+                   |"""),
             self.output(stdout))

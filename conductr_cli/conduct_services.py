@@ -17,19 +17,20 @@ def services(args):
         validation.pretty_json(response.text)
 
     data = sorted([
-        (
-            {
-                'service': service,
-                'bundle_id': bundle['bundleId'] if args.long_ids else bundle_utils.short_id(bundle['bundleId']),
-                'bundle_name': bundle['attributes']['bundleName'],
-                'status': 'Running' if execution['isStarted'] else 'Starting'
-            }
-        )
-        for bundle in json.loads(response.text)
-        for execution in bundle['bundleExecutions']
-        for endpoint_name, endpoint in bundle['bundleConfig']['endpoints'].items()
-        for service in endpoint['services']
-    ], key=lambda line: line['service'])
+                  (
+                      {
+                          'service': service,
+                          'bundle_id': bundle['bundleId'] if args.long_ids else bundle_utils.short_id(
+                              bundle['bundleId']),
+                          'bundle_name': bundle['attributes']['bundleName'],
+                          'status': 'Running' if execution['isStarted'] else 'Starting'
+                      }
+                  )
+                  for bundle in json.loads(response.text)
+                  for execution in bundle['bundleExecutions']
+                  for endpoint_name, endpoint in bundle['bundleConfig']['endpoints'].items()
+                  for service in endpoint['services']
+                  ], key=lambda line: line['service'])
 
     service_endpoints = {}
     for service in data:
@@ -47,9 +48,14 @@ def services(args):
     padding = 2
     column_widths = dict(screen_utils.calc_column_widths(data), **{'padding': ' ' * padding})
     for row in data:
-        print('{service: <{service_width}}{padding}{bundle_id: <{bundle_id_width}}{padding}{bundle_name: <{bundle_name_width}}{padding}{status: <{status_width}}'.format(**dict(row, **column_widths)).rstrip())
+        print(
+            '{service: <{service_width}}{padding}'
+            '{bundle_id: <{bundle_id_width}}{padding}'
+            '{bundle_name: <{bundle_name_width}}{padding}'
+            '{status: <{status_width}}'.format(**dict(row, **column_widths)).rstrip())
 
     if len(duplicate_endpoints) > 0:
         print()
-        validation.warning('Multiple endpoints found for the following services: {}'.format(', '.join(duplicate_endpoints)))
+        validation.warning(
+            'Multiple endpoints found for the following services: {}'.format(', '.join(duplicate_endpoints)))
         validation.warning('Service resolution for these services is undefined.')
