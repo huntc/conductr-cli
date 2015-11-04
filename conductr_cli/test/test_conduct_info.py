@@ -1,4 +1,3 @@
-from unittest import TestCase
 from conductr_cli.test.cli_test_case import CliTestCase, strip_margin
 from conductr_cli import conduct_info
 
@@ -8,7 +7,7 @@ except ImportError:
     from mock import patch, MagicMock
 
 
-class TestConductInfoCommand(TestCase, CliTestCase):
+class TestConductInfoCommand(CliTestCase):
 
     default_args = {
         'ip': '127.0.0.1',

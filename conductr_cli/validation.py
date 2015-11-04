@@ -12,7 +12,7 @@ from conductr_cli.exceptions import DockerMachineError
 
 
 def error(message, *objs):
-    '''print to stderr'''
+    """print to stderr"""
     print('ERROR: {}'.format(message.format(*objs)), file=sys.stderr)
 
 
@@ -36,7 +36,7 @@ def handle_connection_error(func):
         try:
             return func(*args, **kwargs)
         except ConnectionError as err:
-            connection_error(err)
+            connection_error(err)  # ConnectionError doesn't have an args property
 
     # Do not change the wrapped function name,
     # so argparse configuration can be tested.
@@ -113,7 +113,7 @@ def raise_for_status_inc_3xx(response):
 
     response.raise_for_status()
     if response.status_code >= 300:
-        raise HTTPError(status_codes._codes[response.status_code], response=response)
+        raise HTTPError(status_codes._codes[response.status_code], response=response)  # FIXME: _codes is protected
 
 
 def handle_docker_machine_error(func):

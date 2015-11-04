@@ -1,6 +1,6 @@
 import argcomplete
 import argparse
-from conductr_cli.sandbox_common import  CONDUCTR_DEV_IMAGE, HOST_IP
+from conductr_cli.sandbox_common import CONDUCTR_DEV_IMAGE, HOST_IP
 from conductr_cli import sandbox_run, sandbox_stop
 
 
@@ -9,7 +9,6 @@ def build_parser():
     parser = argparse.ArgumentParser('sandbox')
     subparsers = parser.add_subparsers(title='commands',
                                        help='Use one of the following sub commands')
-
 
     # Sub-parser for `run` sub-command
     run_parser = subparsers.add_parser('run',
@@ -46,9 +45,11 @@ def build_parser():
                             metavar='')
     run_parser.add_argument('-l', '--log-level',
                             default='info',
-                            help='Log level of ConductR which can be one of `debug`, `info`, `warning`. Defaults to `info`.\n'
+                            help='Log level of ConductR which can be one of `debug`, `info`, `warning`. '
+                                 'Defaults to `info`.\n'
                                  'You can observe ConductRs logging via the `docker logs` command. \n'
-                                 'For example `docker logs -f cond-0` will follow the logs of the first ConductR container.',
+                                 'For example `docker logs -f cond-0` will follow the logs of the first '
+                                 'ConductR container.',
                             metavar='')
     run_parser.add_argument('-n', '--nr-of-containers',
                             type=int,
@@ -73,10 +74,9 @@ def build_parser():
                             metavar='')
     run_parser.set_defaults(func=sandbox_run.run)
 
-
     # Sub-parser for `debug` sub-command
     debug_parser = subparsers.add_parser('debug',
-                                       help='Not supported. Use `sbt-conductr-sandbox` instead')
+                                         help='Not supported. Use `sbt-conductr-sandbox` instead')
     debug_parser.set_defaults(func='debug')
 
     # Sub-parser for `stop` sub-command
@@ -105,7 +105,8 @@ def run():
     # Validate image_version
     elif vars(args).get('func').__name__ == 'run' and not args.image_version:
         parser.exit('The version of the ConductR Docker image must be set.\n'
-                    'Please visit https://www.typesafe.com/product/conductr/developer to obtain the current version information.')
+                    'Please visit https://www.typesafe.com/product/conductr/developer '
+                    'to obtain the current version information.')
     # Call sandbox function
     else:
         args.func(args)

@@ -1,7 +1,7 @@
 from conductr_cli import sandbox_common, terminal
 
 
-def stop(args):
+def stop():
     """`sandbox stop` command"""
 
     running_containers = sandbox_common.resolve_running_docker_containers()
