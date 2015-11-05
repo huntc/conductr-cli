@@ -1,6 +1,5 @@
 from conductr_cli.test.cli_test_case import create_temp_bundle, strip_margin
 from conductr_cli.test.conduct_load_test_base import ConductLoadTestBase
-import shutil
 
 
 class TestConductLoadCommand(ConductLoadTestBase):
@@ -100,5 +99,3 @@ class TestConductLoadCommand(ConductLoadTestBase):
 
     def test_failure_no_configuration(self):
         self.base_test_failure_no_configuration()
-
-

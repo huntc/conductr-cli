@@ -7,5 +7,5 @@ def stop(args):
 
     running_containers = sandbox_common.resolve_running_docker_containers()
     if running_containers:
-        print("Stopping ConductR..")
+        print('Stopping ConductR..')
         terminal.docker_rm(running_containers)

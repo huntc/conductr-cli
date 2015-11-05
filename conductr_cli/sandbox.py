@@ -69,7 +69,7 @@ def build_parser():
                             action='append',
                             default=[],
                             help='Features to be enabled.\n'
-                                 'Available features: '+', '.join(features),
+                                 'Available features: ' + ', '.join(features),
                             choices=features,
                             metavar='')
     run_parser.set_defaults(func=sandbox_run.run)

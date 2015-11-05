@@ -59,40 +59,40 @@ class TestConductLoadCommand(ConductLoadTestBase):
 
     def test_success_verbose(self):
         self.base_test_success_verbose()
-        
+
     def test_success_long_ids(self):
         self.base_test_success_long_ids()
-        
+
     def test_success_custom_ip_port(self):
         self.base_test_success_custom_ip_port()
-        
+
     def test_success_with_configuration(self):
         self.base_test_success_with_configuration()
-        
+
     def test_failure(self):
         self.base_test_failure()
-        
+
     def test_failure_invalid_address(self):
         self.base_test_failure_invalid_address()
-        
+
     def test_failure_no_nr_of_cpus(self):
         self.base_test_failure_no_nr_of_cpus()
-        
+
     def test_failure_no_memory(self):
         self.base_test_failure_no_memory()
-        
+
     def test_failure_no_disk_space(self):
         self.base_test_failure_no_disk_space()
-        
+
     def test_failure_no_roles(self):
         self.base_test_failure_no_roles()
-        
+
     def test_failure_roles_not_a_list(self):
         self.base_test_failure_roles_not_a_list()
-        
+
     def test_failure_no_bundle(self):
         self.base_test_failure_no_bundle()
-        
+
     def test_failure_no_configuration(self):
         self.base_test_failure_no_configuration()
 

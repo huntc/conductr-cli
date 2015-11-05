@@ -89,7 +89,7 @@ class TestConduct(TestCase):
         self.assertEqual(args.bundle, 'path-to-bundle')
 
     def test_get_cli_parameters(self):
-        host.resolve_default_ip = lambda: "127.0.0.1"
+        host.resolve_default_ip = lambda: '127.0.0.1'
 
         args = Namespace(ip=None, port=9005, api_version='1.0')
         self.assertEqual(get_cli_parameters(args), ' --ip 127.0.0.1')

@@ -71,37 +71,6 @@ If you are running zsh, execute the following command to enable autocomplete:
 
     autoload bashcompinit && autoload compinit && bashcompinit && compinit && eval "$(register-python-argcomplete conduct)"
 
-Running tests
-~~~~~~~~~~~~~
-
-Execute the following command to run unit tests for the current version of python3:
-
-.. code:: bash
-
-    python3 -m unittest
-
-Execute the following command to run all defined tests:
-
-.. code:: bash
-
-    python3 setup.py test
-
-To run only a specific test case in a test suite:
-
-.. code:: bash
-
-    python3 setup.py test -a "-- -s conductr_cli.test.test_conduct_unload:TestConductUnloadCommand.test_failure_invalid_address"
-
-Releasing
-~~~~~~~~~
-
-CLI releases can be performed completely from the GitHub project page. Follow these steps to cut a release:
-
-1. Edit `conductr_cli/__init__.py`_ file to contain the version to be released.
-2. Create a new release in GitHub `releases page`_.
-
-After CI build is finished for the tagged commit, new version will automatically be deployed to PyPi repository.
-
 CLI Usage
 ~~~~~~~~~
 
@@ -195,8 +164,40 @@ In both cases the source files are zipped and a SHA256 digest of the archive is 
 
 For pointers on command usage run ``shazar -h``.
 
-Information for developers
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Developers
+~~~~~~~~~~
+
+For OS X, you should ensure firstly that you have the latest Xcode command line tools installed. 
+
+For all OS environments, pyenv is used to support multiple installations of python during testing. Refer to https://github.com/yyuu/pyenv for information on how to install pyenv. With pyenv installed you can do things like ``pyenv local 3.4.3`` or ``pyenv local system``.
+
+Then for OS X, install python 3.2 and 3.4:
+
+.. code:: bash
+
+  CFLAGS="-I$(brew --prefix openssl)/include" \
+  LDFLAGS="-L$(brew --prefix openssl)/lib" \
+  pyenv install -v 3.2.6
+  
+  CFLAGS="-I$(brew --prefix openssl)/include" \
+  LDFLAGS="-L$(brew --prefix openssl)/lib" \
+  pyenv install -v 3.4.3
+
+For others this is easier:
+
+.. code:: bash
+
+  pyenv install -v 3.2.6
+  pyenv install -v 3.4.3
+
+Make sure to install the necessary dependencies for each environment:
+
+.. code:: bash
+  
+  pip install -e .
+  
+Running
+^^^^^^^
 
 If you want to run ``conduct`` or ``sandbox`` locally, i.e. without installation, ``cd`` into the project directory and execute:
 
@@ -205,17 +206,34 @@ If you want to run ``conduct`` or ``sandbox`` locally, i.e. without installation
     python3 -m conductr_cli.conduct
     python3 -m conductr_cli.sandbox
 
-Make sure to install the necessary dependencies:
+Tests
+^^^^^
+
+Execute the following command to run unit tests for the current version of python3:
 
 .. code:: bash
 
-    pip install -e .
+    python3 -m unittest
 
-.. |Build Status| image:: https://travis-ci.org/typesafehub/conductr-cli.png
-    :target: https://travis-ci.org/typesafehub/conductr-cli
-    :alt: Build Status
-.. |Latest Version| image:: https://pypip.in/version/conductr-cli/badge.svg?style=flat
-    :target: https://pypi.python.org/pypi/conductr-cli/
-    :alt: Latest Version
-.. _releases page: https://github.com/typesafehub/conductr-cli/releases/new
-.. _conductr_cli/__init__.py: https://github.com/typesafehub/conductr-cli/blob/master/conductr_cli/__init__.py
+Execute the following command to run all defined tests:
+
+.. code:: bash
+
+    pyenv local system 3.26 3.4.3
+    python3 setup.py test
+
+To run only a specific test case in a test suite:
+
+.. code:: bash
+
+    python3 setup.py test -a "-- -s conductr_cli.test.test_conduct_unload:TestConductUnloadCommand.test_failure_invalid_address"
+
+Releasing
+^^^^^^^^^
+
+CLI releases can be performed completely from the GitHub project page. Follow these steps to cut a release:
+
+1. Edit `conductr_cli/__init__.py`_ file to contain the version to be released.
+2. Create a new release in GitHub `releases page`_.
+
+After CI build is finished for the tagged commit, new version will automatically be deployed to PyPi repository.

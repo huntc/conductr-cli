@@ -11,6 +11,7 @@ class ConductRunTestBase(CliTestCase):
 
     def __init__(self, method_name):
         super().__init__(method_name)
+
         self.default_args = {}
         self.default_url = None
         self.output_template = None

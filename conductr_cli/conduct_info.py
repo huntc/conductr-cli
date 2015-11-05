@@ -24,7 +24,7 @@ def info(args):
             'starting': sum([not execution['isStarted'] for execution in bundle['bundleExecutions']]),
             'executions': sum([execution['isStarted'] for execution in bundle['bundleExecutions']])
         } for bundle in json.loads(response.text)
-        ]
+    ]
     data.insert(0, {'id': 'ID', 'name': 'NAME', 'replications': '#REP', 'starting': '#STR', 'executions': '#RUN'})
 
     padding = 2

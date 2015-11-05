@@ -1,4 +1,4 @@
-from conductr_cli.test.cli_test_case import CliTestCase, strip_margin
+from conductr_cli.test.cli_test_case import strip_margin
 from conductr_cli.test.conduct_run_test_base import ConductRunTestBase
 from conductr_cli import conduct_run
 

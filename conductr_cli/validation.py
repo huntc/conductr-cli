@@ -142,7 +142,7 @@ def handle_docker_errors(func):
         env_lines = []
         try:
             env_lines = terminal.docker_machine_env('default')
-            print("Retrieved docker environment variables with `docker-machine env default`")
+            print('Retrieved docker environment variables with `docker-machine env default`')
         except FileNotFoundError:
             try:
                 env_lines = terminal.boot2docker_shellinit()
@@ -151,13 +151,16 @@ def handle_docker_errors(func):
             except FileNotFoundError:
                 return []
         return [resolve_env(line) for line in env_lines if line.startswith('export')]
+
     def resolve_env(line):
         key = line.partition(' ')[-1].partition('=')[0]
         value = line.partition(' ')[-1].partition('=')[2].strip('"')
         return key, value
+
     def set_env(key, value):
         print('Set environment variable: {}="{}"'.format(key, value))
         os.environ[key] = value
+
     def handler(*args, **kwargs):
         try:
             return func(*args, **kwargs)
