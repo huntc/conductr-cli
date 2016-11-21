@@ -80,3 +80,12 @@ class WaitTimeoutError(Exception):
 
     def __str__(self):
         return repr(self.value)
+
+
+class InsufficientMemory(Exception):
+    def __init__(self, memory_required, memory_free):
+        self.memory_required = memory_required
+        self.memory_free = memory_free
+
+    def __str__(self):
+        return repr("Insufficient memory: Required: {}, Free: {}".format(self.memory_required, self.memory_free))

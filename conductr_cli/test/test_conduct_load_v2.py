@@ -87,6 +87,11 @@ class TestConductLoadCommand(ConductLoadTestBase):
         conf_mock.assert_called_with(self.bundle_file)
         string_io_mock.assert_called_with('mock bundle.conf')
 
+    def test_insufficient_mem_local_mode(self):
+        conf_mock = MagicMock(return_value='{memory: 1048576}')
+        with patch('conductr_cli.bundle_utils.conf', conf_mock):
+            self.base_test_insufficient_mem_local_mode()
+
     def test_success_verbose(self):
         conf_mock = MagicMock(return_value='mock bundle.conf')
         string_io_mock = MagicMock(return_value='mock bundle.conf - string i/o')

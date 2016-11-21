@@ -124,6 +124,30 @@ class ConductLoadTestBase(CliTestCase):
 
         self.assertEqual(self.default_output(command=self.default_args['command']), self.output(stdout))
 
+    def base_test_insufficient_mem_local_mode(self):
+        self.default_args['local_connection'] = True
+
+        resolve_bundle_mock = MagicMock(return_value=(self.bundle_file_name, self.bundle_file))
+        create_multipart_mock = MagicMock(return_value=self.multipart_mock)
+        get_free_memory = MagicMock(return_value=0)
+        stdout = MagicMock()
+        stderr = MagicMock()
+
+        input_args = MagicMock(**self.default_args)
+        with patch('conductr_cli.resolver.resolve_bundle', resolve_bundle_mock), \
+             patch('conductr_cli.conduct_load.create_multipart', create_multipart_mock), \
+             patch('conductr_cli.terminal.docker_get_free_memory', get_free_memory):
+            logging_setup.configure_logging(input_args, stdout, stderr)
+            result = conduct_load.load(input_args)
+            self.assertFalse(result)
+
+        self.assertEqual(
+            as_error(
+                'Error: You do not have enough memory to run this bundle once loaded. '
+                '1 MiB is required whereas there is only 0 MiB free. '
+                'Please increase the memory available to Docker in order to load this bundle.\n'),
+            self.output(stderr))
+
     def base_test_success_verbose(self):
         resolve_bundle_mock = MagicMock(return_value=(self.bundle_file_name, self.bundle_file))
         create_multipart_mock = MagicMock(return_value=self.multipart_mock)

@@ -17,7 +17,7 @@ class TestConductLoadCommand(ConductLoadTestBase):
 
         self.bundle_id = '45e0c477d3e5ea92aa8d85c0d8f3e25c'
         self.nr_of_cpus = 1.0
-        self.memory = 200
+        self.memory = 1048576
         self.disk_space = 100
         self.roles = ['web-server']
         self.bundle_file_name = 'bundle.zip'
@@ -74,6 +74,9 @@ class TestConductLoadCommand(ConductLoadTestBase):
 
     def test_success_dcos_mode(self):
         self.base_test_success_dcos_mode()
+
+    def test_insufficient_mem_local_mode(self):
+        self.base_test_insufficient_mem_local_mode()
 
     def test_success_verbose(self):
         self.base_test_success_verbose()

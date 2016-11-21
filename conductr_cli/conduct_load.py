@@ -1,7 +1,7 @@
 from pyhocon import ConfigFactory, ConfigTree
 from pyhocon.exceptions import ConfigMissingException
-from conductr_cli import bundle_utils, conduct_request, conduct_url, screen_utils, validation
-from conductr_cli.exceptions import MalformedBundleError, InsecureFilePermissions
+from conductr_cli import bundle_utils, conduct_request, conduct_url, screen_utils, terminal, validation
+from conductr_cli.exceptions import MalformedBundleError, InsecureFilePermissions, InsufficientMemory
 from conductr_cli import resolver, bundle_installation
 from conductr_cli.constants import DEFAULT_BUNDLE_RESOLVE_CACHE_DIR
 from conductr_cli.conduct_url import conductr_host
@@ -30,6 +30,7 @@ KEEP_BUNDLE_VERSIONS = 1
 @validation.handle_wait_timeout_error
 @validation.handle_conduct_load_read_timeout_error
 @validation.handle_insecure_file_permissions
+@validation.handle_insufficient_memory_when_loading
 def load(args):
     if args.api_version == '1':
         return load_v1(args)
@@ -56,10 +57,13 @@ def load_v1(args):
                                                                                             args.configuration)
 
     bundle_conf = ConfigFactory.parse_string(bundle_utils.conf(bundle_file))
-    overlay_bundle_conf = None if configuration_file is None else \
+    bundle_overlay_conf = None if configuration_file is None else \
         ConfigFactory.parse_string(bundle_utils.conf(configuration_file))
 
-    with_bundle_configurations = partial(apply_to_configurations, bundle_conf, overlay_bundle_conf)
+    with_bundle_configurations = partial(apply_to_configurations, bundle_conf, bundle_overlay_conf)
+
+    if args.local_connection:
+        validate_sufficient_memory(bundle_conf, bundle_overlay_conf)
 
     url = conduct_url.url('bundles', args)
     files = get_payload(bundle_file_name, bundle_file, with_bundle_configurations)
@@ -136,6 +140,14 @@ def validate_cache_dir_permissions(cache_dir, log):
                 raise InsecureFilePermissions('The cache directory {} has the permissions: {}'.format(cache_dir,
                                                                                                       permissions))
 
+def validate_sufficient_memory(bundle_conf, bundle_overlay_conf):
+    with_bundle_configurations = partial(apply_to_configurations, bundle_conf, bundle_overlay_conf)
+
+    memory_required = int(with_bundle_configurations(ConfigTree.get_string, 'memory'))
+    memory_free = terminal.docker_get_free_memory()
+    if memory_free - memory_required <= 0:
+        raise InsufficientMemory(memory_required, memory_free)
+
 
 def load_v2(args):
     log = logging.getLogger(__name__)
@@ -147,22 +159,28 @@ def load_v2(args):
     validate_cache_dir_permissions(resolve_cache_dir, log)
 
     bundle_file_name, bundle_file = resolver.resolve_bundle(custom_settings, resolve_cache_dir, args.bundle)
-    bundle_conf = bundle_utils.conf(bundle_file)
+    bundle_conf_part = bundle_utils.conf(bundle_file)
 
-    if bundle_conf is None:
+    if bundle_conf_part is None:
         raise MalformedBundleError('Unable to find bundle.conf within the bundle file')
     else:
-        configuration_file_name, configuration_file, bundle_conf_overlay = (None, None, None)
+        configuration_file_name, configuration_file, bundle_conf_overlay_part = (None, None, None)
         if args.configuration is not None:
             log.info('Retrieving configuration...')
             configuration_file_name, configuration_file = resolver.resolve_bundle_configuration(custom_settings,
                                                                                                 resolve_cache_dir,
                                                                                                 args.configuration)
-            bundle_conf_overlay = bundle_utils.conf(configuration_file)
+            bundle_conf_overlay_part = bundle_utils.conf(configuration_file)
 
-        files = [('bundleConf', ('bundle.conf', string_io(bundle_conf)))]
-        if bundle_conf_overlay is not None:
-            files.append(('bundleConfOverlay', ('bundle.conf', string_io(bundle_conf_overlay))))
+        if args.local_connection:
+            bundle_conf = ConfigFactory.parse_string(bundle_conf_part)
+            bundle_overlay_conf = None if bundle_conf_overlay_part is None else \
+                ConfigFactory.parse_string(bundle_conf_overlay_part)
+            validate_sufficient_memory(bundle_conf, bundle_overlay_conf)
+
+        files = [('bundleConf', ('bundle.conf', string_io(bundle_conf_part)))]
+        if bundle_conf_overlay_part is not None:
+            files.append(('bundleConfOverlay', ('bundle.conf', string_io(bundle_conf_overlay_part))))
         files.append(('bundle', (bundle_file_name, open(bundle_file, 'rb'))))
         if configuration_file is not None:
             files.append(('configuration', (configuration_file_name, open(configuration_file, 'rb'))))

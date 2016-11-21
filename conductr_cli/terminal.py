@@ -37,6 +37,17 @@ def docker_rm(containers):
     return subprocess.call(['docker', 'rm', '-f'] + containers)
 
 
+def docker_get_free_memory():
+    exec = subprocess.Popen(['docker', 'exec', 'cond-0', 'free', '-b'], stdout=subprocess.PIPE)
+    grep = subprocess.Popen(['grep', 'Mem'], stdin=exec.stdout, stdout=subprocess.PIPE)
+    awk = subprocess.Popen(['awk', '{print $4}'], stdin=grep.stdout, stdout=subprocess.PIPE)
+    exec.stdout.close()
+    grep.stdout.close()
+    output = awk.communicate()[0]
+    exec.wait()
+    return int(output)
+
+
 def docker_machine_env(vm_name):
     cmd = ['docker-machine', 'env', vm_name]
     output = subprocess.check_output(cmd, universal_newlines=True).strip()

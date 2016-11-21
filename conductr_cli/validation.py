@@ -12,7 +12,7 @@ from zipfile import BadZipFile
 from conductr_cli import terminal, docker_machine
 from conductr_cli.exceptions import AmbiguousDockerVmError, DockerMachineNotRunningError, \
     DockerMachineCannotConnectToDockerError, MalformedBundleError, BundleResolutionError,  \
-    WaitTimeoutError, InsecureFilePermissions, NOT_FOUND_ERROR
+    WaitTimeoutError, InsecureFilePermissions, NOT_FOUND_ERROR, InsufficientMemory
 from subprocess import CalledProcessError
 
 
@@ -191,6 +191,25 @@ def handle_insecure_file_permissions(func):
             log = get_logger_for_func(func)
             log.error('File permissions are not secure: {}'.format(err.args[0]))
             log.error('Please choose a file where only the owner has access, e.g. 700')
+            return False
+
+    # Do not change the wrapped function name,
+    # so argparse configuration can be tested.
+    handler.__name__ = func.__name__
+
+    return handler
+
+
+def handle_insufficient_memory_when_loading(func):
+    def handler(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except InsufficientMemory as err:
+            log = get_logger_for_func(func)
+            log.error('You do not have enough memory to run this bundle once loaded. '
+                      '{} MiB is required whereas there is only {} MiB free. '
+                      'Please increase the memory available to Docker in order to load this bundle.'
+                      .format(int(err.memory_required / 1024 / 1024), int(err.memory_free / 1024 / 1024)))
             return False
 
     # Do not change the wrapped function name,
