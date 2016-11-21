@@ -99,7 +99,7 @@ class TestSandbox(CliTestCase):
 
     def test_docker_insufficient_cpu(self):
         stdout_mock = MagicMock()
-        docker_info_mock = MagicMock(return_value=b'\nTotal Memory: 3.8 GiB\nCPUs: 3')
+        docker_info_mock = MagicMock(return_value=b'\nTotal Memory: 4 GiB\nCPUs: 3')
 
         logging_setup.configure_logging(MagicMock(), output=stdout_mock)
 
@@ -113,7 +113,7 @@ class TestSandbox(CliTestCase):
 
     def test_docker_sufficient_ram_and_cpu(self):
         stdout_mock = MagicMock()
-        docker_info_mock = MagicMock(return_value=b'\nTotal Memory: 3.8 GiB\nCPUs: 4')
+        docker_info_mock = MagicMock(return_value=b'\nTotal Memory: 4 GiB\nCPUs: 4')
 
         logging_setup.configure_logging(MagicMock(), output=stdout_mock)
 

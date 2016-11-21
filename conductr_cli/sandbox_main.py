@@ -9,6 +9,10 @@ from conductr_cli import sandbox_run, sandbox_stop, sandbox_common, logging_setu
 from subprocess import CalledProcessError
 
 
+DEFAULT_DOCKER_RAM_SIZE = 4
+DEFAULT_DOCKER_CPU_COUNT = 4
+
+
 def build_parser():
     # Main argument parser
     parser = argparse.ArgumentParser('sandbox')
@@ -134,17 +138,20 @@ def validate_docker_vm(vm_type):
     if vm_type is DockerVmType.DOCKER_ENGINE:
         try:
             info = terminal.docker_info()
-            existing_ram, has_sufficient_ram = docker.ram_check(info)
-            existing_cpu, has_sufficient_cpu = docker.cpu_check(info)
+            existing_ram = docker.get_ram_from_info(info)
+            existing_cpu = docker.get_cpu_from_info(info)
+
+            has_sufficient_ram = existing_ram >= DEFAULT_DOCKER_RAM_SIZE
+            has_sufficient_cpu = existing_cpu >= DEFAULT_DOCKER_CPU_COUNT
 
             if not has_sufficient_ram or not has_sufficient_cpu:
                 if not has_sufficient_ram:
                     log.warning('Docker has insufficient RAM of {} GiB - please increase to a minimum of {} GiB'
-                                .format(existing_ram, docker.DEFAULT_DOCKER_RAM_SIZE))
+                                .format(existing_ram, DEFAULT_DOCKER_RAM_SIZE))
 
                 if not has_sufficient_cpu:
                     log.warning('Docker has an insufficient no. of CPUs {} - please increase to a minimum of {} CPUs'
-                                .format(existing_cpu, docker.DEFAULT_DOCKER_CPU_COUNT))
+                                .format(existing_cpu, DEFAULT_DOCKER_CPU_COUNT))
         except (AttributeError, CalledProcessError):
             log.error('Docker native is installed but not running.')
             log.error('Please start Docker with one of the Docker flavors based on your OS:')

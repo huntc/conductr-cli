@@ -3,9 +3,6 @@ import re
 from conductr_cli.exceptions import AmbiguousDockerVmError
 from conductr_cli import validation
 
-DEFAULT_DOCKER_RAM_SIZE = 3.8
-DEFAULT_DOCKER_CPU_COUNT = 4
-
 
 class DockerVmType:
     DOCKER_ENGINE = 1
@@ -36,15 +33,13 @@ def vm_type():
         return DockerVmType.NONE
 
 
-def ram_check(info):
+def get_ram_from_info(info):
     m = re.search(b'.*\\nTotal Memory: (\d+(\.\d*)?).*', info)
     existing_ram_size = float(m.group(1))
-    has_sufficient_ram = existing_ram_size >= DEFAULT_DOCKER_RAM_SIZE
-    return existing_ram_size, has_sufficient_ram
+    return existing_ram_size
 
 
-def cpu_check(info):
+def get_cpu_from_info(info):
     m = re.search(b'.*\\nCPUs: (\d+).*', info)
     existing_cpu_count = int(m.group(1))
-    has_sufficient_cpu = existing_cpu_count >= DEFAULT_DOCKER_CPU_COUNT
-    return existing_cpu_count, has_sufficient_cpu
+    return existing_cpu_count
